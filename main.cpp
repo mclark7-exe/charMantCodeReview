@@ -12,7 +12,7 @@ bool subtract(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int
 bool multiply(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int len);
 bool divide(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int len);
 
-void commonDenominator(int& numerator1, int& denominator1, int& numerator2, int& denominator2);
+bool commonDenominator(int& numerator1, int& denominator1, int& numerator2, int& denominator2);
 
 int main()
 {
@@ -70,6 +70,21 @@ int main()
     {
         //display error message
         cout<<"Error on divide"<<endl;
+    }
+
+    if(commonDenominator(n1, d1, n2, d2))
+    {
+        //display new n1, d1, n2, d2
+        cout<<"n1: "<<n1<<endl;
+        cout<<"d1: "<<d1<<endl;
+        cout<<"n2: "<<n2<<endl;
+        cout<<"d2: "<<d2<<endl;
+
+    }
+    else
+    {
+        //display error message
+        cout<<"Error on finding common denominator"<<endl;
     }
 
     return 0;
@@ -137,8 +152,37 @@ bool divide(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int l
     return true;
 }
 //--
-void commonDenominator(int& numerator1, int& denominator1, int& numerator2, int& denominator2){
+bool commonDenominator(int& numerator1, int& denominator1, int& numerator2, int& denominator2){
     //helper function for add and subtract functions
     //gives two mantissas a common denominator for easier addition and subtraction
-    return 0;
+
+    //check for invalid parameters (denominators should not be zero or negative and numerators should not be negative)
+    if(denominator1 <=0 || denominator2 <=0 || numerator1 < 0 || numerator2 < 0)
+    {
+        return false;
+    }
+
+    int lcm;
+    if(denominator1 > denominator2)
+    {
+        lcm = denominator1;
+        while (lcm % denominator2 != 0)
+        {
+            lcm += denominator1;
+        }
+    }
+    else
+    {
+        lcm = denominator2;
+        while (lcm % denominator1 != 0)
+        {
+            lcm += denominator2;
+        }
+    }
+    numerator1 *= (lcm / denominator1);
+    denominator1 = lcm;
+    numerator2 *= (lcm / denominator2);
+    denominator2 = lcm;
+
+    return true;
 }
