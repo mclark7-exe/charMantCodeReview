@@ -14,6 +14,8 @@ bool divide(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int l
 
 bool commonDenominator(int& numerator1, int& denominator1, int& numerator2, int& denominator2);
 int numberOfDigits(int targetInteger);
+bool convertToCString(int characteristic, int numerator, int denominator, char resultCString[], int length);
+bool decimalIzeFraction(int& numerator, int& denominator, int digits);
 
 int main()
 {
@@ -88,6 +90,19 @@ int main()
         cout<<"Error on finding common denominator"<<endl;
     }
 
+    if(decimalIzeFraction(n2, d2, 6))
+    {
+        //display new n1, d1
+        cout<<"n2: "<<n2<<endl;
+        cout<<"d2: "<<d2<<endl;
+
+    }
+    else
+    {
+        //display error message
+        cout<<"Error on decimalizing fraction"<<endl;
+    }
+    
     return 0;
 } 
 //--
@@ -122,10 +137,13 @@ bool add(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int len)
     int resultDenominator = d1;
 
     //handle improper fractions
-    if (resultNumerator >= resultDenominator) {
+    if (resultNumerator >= resultDenominator)
+    {
         resultCharacteristic++;
         resultNumerator -= resultDenominator;
     }
+
+    convertToCString(resultCharacteristic, resultNumerator, resultDenominator, result, len);
 
     return true;
 }
@@ -142,15 +160,18 @@ bool subtract(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int
     commonDenominator(n1, d1, n2, d2);
 
     int resultCharacteristic = c1 - c2;
-    int resultNumerator = n1 + n2;
+    int resultNumerator = n1 - n2;
     int resultDenominator = d1;
 
 
     //handle negative numerator
-    if (resultNumerator <0) {
+    if (resultNumerator <0)
+    {
         resultCharacteristic--;
         resultNumerator += resultDenominator;
     }
+
+    convertToCString(resultCharacteristic, resultNumerator, resultDenominator, result, len);
 
     return true;
 }
@@ -212,18 +233,107 @@ bool commonDenominator(int& numerator1, int& denominator1, int& numerator2, int&
     return true;
 }
 //--
-int numberOfDigits(int targetInteger) {
+int numberOfDigits(int targetInteger)
+{
     //helper function, returns the number of digits in an integer
-    
+
     int digitCount = 0;
 
-    if(targetInteger == 0) {
-        return 1;
+    //the integer 0 has one digit
+    //also, if the integer is negative, the (-) symbol will count as a digit
+    if(targetInteger <= 0)
+    {
+        digitCount++;
     }
 
-    while(targetInteger != 0) {
+    while(targetInteger != 0)
+    {
         targetInteger = targetInteger / 10;
         digitCount++;
     }
     return digitCount;
+}
+//--
+bool convertToCString(int characteristic, int numerator, int denominator, char resultCString[], int length)
+{
+    //helper function, converts float into C String
+
+    int characteristicLength = numberOfDigits(characteristic);
+    int currentCharInArray = 0;
+
+    //if characteristic can't fit into C String
+    if (characteristicLength > length - 1) {
+        return false;
+    }
+
+    resultCString[length-1] = '\0';
+
+    //if characteristic is negative
+    if (characteristic < 0) {
+        resultCString[0] = '-';
+        characteristic *= -1;
+    }
+
+    //if characteristic = 0
+    if (characteristic == 0) {
+        resultCString[0] = '0';
+    }
+
+    currentCharInArray = characteristicLength - 1;
+
+    //for every digit in characteristic
+    while (characteristic > 0) {
+        //add digit
+        resultCString[currentCharInArray] = (characteristic % 10) + 48;
+        currentCharInArray--;
+        characteristic /= 10;
+    }
+
+    currentCharInArray = characteristicLength;
+
+    //if there is no mantissa or mantissa will not fit in array
+    if (currentCharInArray >= (length - 2) || numerator == 0)
+    {
+        return true;
+    }
+
+    resultCString[currentCharInArray] = '.';
+    currentCharInArray = length - 2;
+
+    //converts mantissa into form easier to write as a decimal
+    decimalIzeFraction(numerator, denominator, length - characteristicLength - 2);
+
+    while (numerator > 0) {
+        //add digit
+        resultCString[currentCharInArray] = (numerator % 10) + 48;
+        currentCharInArray--;
+        numerator /= 10;
+    }
+
+    return true;
+}
+//--
+bool decimalIzeFraction(int& numerator, int& denominator, int digits)
+{
+    //helper function, converts fractions to have a denominator of an exponent of 10
+
+    //check for invalid parameters (denominator should not be zero or negative and numerator should not be negative)
+    if(denominator <=0 || numerator < 0)
+    {
+        return false;
+    }
+
+    int newNumerator = numerator;
+    int newDenominator = 1;
+
+    for (int i = digits; i > 0; i--) {
+        newNumerator *= 10;
+        newDenominator *= 10;
+    }
+
+    numerator = newNumerator / denominator;
+
+    denominator = newDenominator;
+
+    return true;
 }
