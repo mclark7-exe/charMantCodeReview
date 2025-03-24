@@ -12,6 +12,8 @@ bool subtract(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int
 bool multiply(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int len);
 bool divide(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int len);
 
+void commonDenominator(int& numerator1, int& denominator1, int& numerator2, int& denominator2);
+
 int main()
 {
     //this c-string, or array of 8 characters, ends with the null terminating character '\0'
@@ -133,4 +135,10 @@ bool divide(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int l
     result[6] = '\0';
     
     return true;
+}
+//--
+void commonDenominator(int& numerator1, int& denominator1, int& numerator2, int& denominator2){
+    //helper function for add and subtract functions
+    //gives two mantissas a common denominator for easier addition and subtraction
+    return 0;
 }
