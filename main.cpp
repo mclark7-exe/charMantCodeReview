@@ -13,6 +13,7 @@ bool multiply(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int
 bool divide(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int len);
 
 bool commonDenominator(int& numerator1, int& denominator1, int& numerator2, int& denominator2);
+int numberOfDigits(int targetInteger);
 
 int main()
 {
@@ -209,4 +210,20 @@ bool commonDenominator(int& numerator1, int& denominator1, int& numerator2, int&
     denominator2 = lcm;
 
     return true;
+}
+//--
+int numberOfDigits(int targetInteger) {
+    //helper function, returns the number of digits in an integer
+    
+    int digitCount = 0;
+
+    if(targetInteger == 0) {
+        return 1;
+    }
+
+    while(targetInteger != 0) {
+        targetInteger = targetInteger / 10;
+        digitCount++;
+    }
+    return digitCount;
 }
