@@ -107,26 +107,50 @@ bool mantissa(const char numString[], int& numerator, int& denominator)
 //--
 bool add(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int len)
 {
-    //you will have to come up with an algorithm to add the two numbers
-    //hard coded return value to make the main() work
-    result[0] = '4';
-    result[1] = '.';
-    result[2] = '1';
-    result[3] = '6';
-    result[4] = '6';
-    result[5] = '6';
-    result[6] = '6';
-    result[7] = '6';
-    result[8] = '6';
-    result[9] = '\0';
+    //check for invalid parameters (denominators should not be zero or negative and numerators should not be negative)
+    if(d1 <=0 || d2 <=0 || n1 < 0 || n2 < 0)
+    {
+        return false;
+    }
+
+    //give mantissas a common denominator
+    commonDenominator(n1, d1, n2, d2);
+
+    int resultCharacteristic = c1 + c2;
+    int resultNumerator = n1 + n2;
+    int resultDenominator = d1;
+
+    //handle improper fractions
+    if (resultNumerator >= resultDenominator) {
+        resultCharacteristic++;
+        resultNumerator -= resultDenominator;
+    }
 
     return true;
 }
 //--
 bool subtract(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int len)
 {
-    //hard coded return value to make the code compile
-    //you will have to come up with an algorithm to subtract the two numbers
+    //check for invalid parameters (denominators should not be zero or negative and numerators should not be negative)
+    if(d1 <=0 || d2 <=0 || n1 < 0 || n2 < 0)
+    {
+        return false;
+    }
+
+    //give mantissas a common denominator
+    commonDenominator(n1, d1, n2, d2);
+
+    int resultCharacteristic = c1 - c2;
+    int resultNumerator = n1 + n2;
+    int resultDenominator = d1;
+
+
+    //handle negative numerator
+    if (resultNumerator <0) {
+        resultCharacteristic--;
+        resultNumerator += resultDenominator;
+    }
+
     return true;
 }
 //--
