@@ -123,8 +123,8 @@ bool mantissa(const char numString[], int& numerator, int& denominator)
 //--
 bool add(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int len)
 {
-    //check for invalid parameters (denominators should not be zero or negative and numerators should not be negative)
-    if(d1 <=0 || d2 <=0 || n1 < 0 || n2 < 0)
+    //check for invalid parameters (denominators should not be zero or negative)
+    if(d1 <=0 || d2 <=0)
     {
         return false;
     }
@@ -150,8 +150,8 @@ bool add(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int len)
 //--
 bool subtract(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int len)
 {
-    //check for invalid parameters (denominators should not be zero or negative and numerators should not be negative)
-    if(d1 <=0 || d2 <=0 || n1 < 0 || n2 < 0)
+    //check for invalid parameters (denominators should not be zero or negative)
+    if(d1 <=0 || d2 <=0)
     {
         return false;
     }
@@ -165,8 +165,9 @@ bool subtract(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int
 
 
     //handle negative numerator
-    if (resultNumerator <0)
+    if (resultNumerator <0 && resultCharacteristic >= 0)
     {
+
         resultCharacteristic--;
         resultNumerator += resultDenominator;
     }
@@ -178,23 +179,49 @@ bool subtract(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int
 //--
 bool multiply(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int len)
 {
-    //hard coded return value to make the code compile
-    //you will have to come up with an algorithm to multiply the two numbers
+    //check for invalid parameters (denominators should not be zero or negative)
+    if(d1 <=0 || d2 <=0)
+    {
+        return false;
+    }
+
+    int improperNumerator1 = (c1 * d1) + n1;
+    int improperNumerator2 = (c2 * d2) + n2;
+    int resultNumerator = improperNumerator1 * improperNumerator2;
+    int resultDenominator = d1 * d2;
+    int resultCharacteristic = 0;
+
+    while (resultNumerator >= resultDenominator) {
+        resultCharacteristic++;
+        resultNumerator -= resultDenominator;
+    }
+
+    convertToCString(resultCharacteristic, resultNumerator, resultDenominator, result, len);
+
     return true;
 }
 //--
 bool divide(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int len)
 {
-    //you will have to come up with an algorithm to divide the two numbers
-    //hard coded return value to make the main() work
-    result[0] = '0';
-    result[1] = '.';
-    result[2] = '5';
-    result[3] = '6';
-    result[4] = '2';
-    result[5] = '5';
-    result[6] = '\0';
-    
+    //check for invalid parameters (denominators should not be zero or negative)
+    if(d1 <=0 || d2 <=0)
+    {
+        return false;
+    }
+
+    int improperNumerator1 = (c1 * d1) + n1;
+    int improperNumerator2 = (c2 * d2) + n2;
+    int resultNumerator = improperNumerator1 * d2;
+    int resultDenominator = d1 * improperNumerator2;
+    int resultCharacteristic = 0;
+
+    while (resultNumerator >= resultDenominator) {
+        resultCharacteristic++;
+        resultNumerator -= resultDenominator;
+    }
+
+    convertToCString(resultCharacteristic, resultNumerator, resultDenominator, result, len);
+
     return true;
 }
 //--
@@ -202,8 +229,8 @@ bool commonDenominator(int& numerator1, int& denominator1, int& numerator2, int&
     //helper function for add and subtract functions
     //gives two mantissas a common denominator for easier addition and subtraction
 
-    //check for invalid parameters (denominators should not be zero or negative and numerators should not be negative)
-    if(denominator1 <=0 || denominator2 <=0 || numerator1 < 0 || numerator2 < 0)
+    //check for invalid parameters (denominators should not be zero or negative)
+    if(denominator1 <=0 || denominator2 <=0)
     {
         return false;
     }
@@ -294,6 +321,7 @@ bool convertToCString(int characteristic, int numerator, int denominator, char r
     //if there is no mantissa or mantissa will not fit in array
     if (currentCharInArray >= (length - 2) || numerator == 0)
     {
+        resultCString[characteristicLength] = '\0';
         return true;
     }
 
@@ -317,8 +345,8 @@ bool decimalIzeFraction(int& numerator, int& denominator, int digits)
 {
     //helper function, converts fractions to have a denominator of an exponent of 10
 
-    //check for invalid parameters (denominator should not be zero or negative and numerator should not be negative)
-    if(denominator <=0 || numerator < 0)
+    //check for invalid parameters (denominator should not be zero or negative)
+    if(denominator <=0)
     {
         return false;
     }
