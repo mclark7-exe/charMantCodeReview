@@ -19,8 +19,6 @@ int main() {
   const char number[] = "123.456";
   int c, n, d;
 
-  cout << stringLength(number) << endl;
-
   // if both conversions from c-string to integers can take place
   if (characteristic(number, c) && mantissa(number, n, d)) {
     // do some math with c, n, and d
@@ -64,12 +62,35 @@ int main() {
     cout << "Error on divide" << endl;
   }
 
-    return 0;
-} 
+  return 0;
+}
+//--
+bool characteristic(const char numString[], int &c) {
+  int characteristic = 0;
+  int sign = 1;
+  int index = 0;
+
+  char *cleansedString = cleansed(numString);
+  if (cleansedString[index] == '-') {
+    sign *= -1;
+    index++;
+  }
+
+  char current = cleansedString[index];
+  while (current != '\0' && current != '.') {
+    characteristic = characteristic * 10 + current - 48;
+    index++;
+    current = cleansedString[index];
+  }
+
+  delete cleansedString;
+  c = characteristic;
+  return true;
+}
+//--
 //--
 int stringLength(const char numString[]) {
   // Find and return length of char[]
-
   int count = 0;
   char iterator = numString[count];
   while (iterator != '\0') {
@@ -80,11 +101,12 @@ int stringLength(const char numString[]) {
 }
 //--
 char *cleansed(const char numString[]) {
+  // Remove unneeded characters
   int stringSize = stringLength(numString);
   char *clean = new char[stringSize + 1];
   int index = 0;
   for (int i = 0; i < stringSize; i++) {
-    if (numString[i] == '-' || numString[i] == '.' || (numString[i] >= 48 && numString[i] <= 57)) {
+    if ((numString[i] == '-' && index == 0) || numString[i] == '.' || (numString[i] >= 48 && numString[i] <= 57)) {
       clean[index] = numString[i];
       index++;
     }
