@@ -6,6 +6,7 @@ bool characteristic(const char numString[], int &c);
 bool mantissa(const char numString[], int &numerator, int &denominator);
 int stringLength(const char numString[]);
 char *cleansed(const char numString[]);
+bool isPeriod(const char numString[], int &pos, const int size);
 
 bool add(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int len);
 bool subtract(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int len);
@@ -88,6 +89,19 @@ bool characteristic(const char numString[], int &c) {
   return true;
 }
 //--
+bool mantissa(const char numString[], int &numerator, int &denominator) {
+  // hard coded return value to make the main() work
+  char *cleansedString = cleansed(numString);
+  int stringSize = stringLength(numString);
+  int periodPos;
+  if (isPeriod(cleansedString, periodPos, stringSize)) {
+  }
+
+  numerator = 456;
+  denominator = 1000;
+  delete cleansedString;
+  return true;
+}
 //--
 int stringLength(const char numString[]) {
   // Find and return length of char[]
@@ -113,6 +127,19 @@ char *cleansed(const char numString[]) {
   }
   clean[index] = '\0';
   return clean;
+}
+//--
+bool isPeriod(const char numString[], int &pos, const int size) {
+  bool containsPeriod = false;
+  for (int i = 0; i < size; i++) {
+    if (numString[i] == '.') {
+      containsPeriod = true;
+      pos = i;
+      break;
+    }
+  }
+
+  return containsPeriod;
 }
 //--
 bool add(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int len) {
