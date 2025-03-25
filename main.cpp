@@ -4,8 +4,9 @@ using namespace std;
 // required function prototypes
 bool characteristic(const char numString[], int &c);
 bool mantissa(const char numString[], int &numerator, int &denominator);
+
 int stringLength(const char numString[]);
-char *cleansed(const char numString[]);
+char *cleansed(const char numString[], bool &valid);
 bool isPeriod(const char numString[], int &pos, const int size);
 
 bool add(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int len);
@@ -67,26 +68,28 @@ int main() {
 }
 //--
 bool characteristic(const char numString[], int &c) {
+  bool valid = true;
   int characteristic = 0;
   int sign = 1;
   int index = 0;
 
-  char *cleansedString = cleansed(numString);
+  char *cleansedString = cleansed(numString, valid);
   if (cleansedString[index] == '-') {
     sign *= -1;
     index++;
   }
 
   char current = cleansedString[index];
-  while (current != '\0' && current != '.') {
-    characteristic = characteristic * 10 + current - 48;
-    index++;
-    current = cleansedString[index];
+  if (current >= 48 && current <= 57 && valid) {
+    while (current != '\0' && current != '.') {
+      characteristic = characteristic * 10 + current - 48;
+      index++;
+      current = cleansedString[index];
+    }
   }
-
   delete cleansedString;
-  c = characteristic;
-  return true;
+  c = characteristic * sign;
+  return valid;
 }
 //--
 bool mantissa(const char numString[], int &numerator, int &denominator) {
@@ -114,8 +117,9 @@ int stringLength(const char numString[]) {
   return count;
 }
 //--
-char *cleansed(const char numString[]) {
+char *cleansed(const char numString[], bool &valid) {
   // Remove unneeded characters
+  int periodCount = 0;
   int stringSize = stringLength(numString);
   char *clean = new char[stringSize + 1];
   int index = 0;
@@ -123,8 +127,19 @@ char *cleansed(const char numString[]) {
     if ((numString[i] == '-' && index == 0) || numString[i] == '.' || (numString[i] >= 48 && numString[i] <= 57)) {
       clean[index] = numString[i];
       index++;
+      if (numString[i] == '.') {
+        periodCount++;
+      }
+    } else if ((numString[i] == '+' && index == 0) || numString[i] == ' ') {
+      continue;
+    } else {
+      valid = false;
     }
   }
+  if (periodCount > 1) {
+    valid = false;
+  }
+
   clean[index] = '\0';
   return clean;
 }
