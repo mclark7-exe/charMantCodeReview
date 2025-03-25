@@ -94,16 +94,29 @@ bool characteristic(const char numString[], int &c) {
 //--
 bool mantissa(const char numString[], int &numerator, int &denominator) {
   // hard coded return value to make the main() work
-  char *cleansedString = cleansed(numString);
+  bool valid = true;
+  char *cleansedString = cleansed(numString, valid);
   int stringSize = stringLength(numString);
-  int periodPos;
-  if (isPeriod(cleansedString, periodPos, stringSize)) {
+  int startingPos;
+
+  if (isPeriod(cleansedString, startingPos, stringSize) && startingPos != stringSize - 1 && valid) {
+    numerator = 0;
+    denominator = 1;
+    startingPos++;
+    char current = cleansedString[startingPos];
+    while (current != '\0') {
+      numerator = numerator * 10 + current - 48;
+      denominator *= 10;
+      startingPos++;
+      current = cleansedString[startingPos];
+    }
+  } else {
+    numerator = 0;
+    denominator = 10;
   }
 
-  numerator = 456;
-  denominator = 1000;
   delete cleansedString;
-  return true;
+  return valid;
 }
 //--
 int stringLength(const char numString[]) {
