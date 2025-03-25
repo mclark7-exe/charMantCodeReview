@@ -1,5 +1,6 @@
 
 #include <iostream>
+#include <string.h>
 using namespace std;
 
 //required function prototypes
@@ -16,6 +17,7 @@ bool commonDenominator(int& numerator1, int& denominator1, int& numerator2, int&
 int numberOfDigits(int targetInteger);
 bool convertToCString(int characteristic, int numerator, int denominator, char resultCString[], int length);
 bool decimalIzeFraction(int& numerator, int& denominator, int digits);
+bool removeInsignificantDigits(char numCString [], int length);
 
 int main()
 {
@@ -102,9 +104,9 @@ int main()
         //display error message
         cout<<"Error on decimalizing fraction"<<endl;
     }
-    
+
     return 0;
-} 
+}
 //--
 bool characteristic(const char numString[], int& c)
 {
@@ -338,6 +340,7 @@ bool convertToCString(int characteristic, int numerator, int denominator, char r
         numerator /= 10;
     }
 
+    removeInsignificantDigits(resultCString, length);
     return true;
 }
 //--
@@ -363,5 +366,25 @@ bool decimalIzeFraction(int& numerator, int& denominator, int digits)
 
     denominator = newDenominator;
 
+    return true;
+}
+
+bool removeInsignificantDigits(char numCString [], int length)
+{
+    for (int i = length - 2; i >= 0; i--)
+    {
+        if (numCString[i] == '0')
+        {
+            numCString[i] = '\0';
+        }
+        else if (numCString[i] == '.')
+        {
+            numCString[i] = '\0';
+            break;
+        }
+        else{
+            break;
+        }
+    }
     return true;
 }
