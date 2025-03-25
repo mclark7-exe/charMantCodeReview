@@ -5,6 +5,7 @@ using namespace std;
 bool characteristic(const char numString[], int &c);
 bool mantissa(const char numString[], int &numerator, int &denominator);
 int stringLength(const char numString[]);
+char *cleansed(const char numString[]);
 
 bool add(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int len);
 bool subtract(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int len);
@@ -78,12 +79,18 @@ int stringLength(const char numString[]) {
   return count;
 }
 //--
-bool mantissa(const char numString[], int& numerator, int& denominator)
-{
-    //hard coded return value to make the main() work
-    numerator = 456;
-    denominator = 1000;
-    return true;
+char *cleansed(const char numString[]) {
+  int stringSize = stringLength(numString);
+  char *clean = new char[stringSize + 1];
+  int index = 0;
+  for (int i = 0; i < stringSize; i++) {
+    if (numString[i] == '-' || numString[i] == '.' || (numString[i] >= 48 && numString[i] <= 57)) {
+      clean[index] = numString[i];
+      index++;
+    }
+  }
+  clean[index] = '\0';
+  return clean;
 }
 //--
 bool add(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int len) {
