@@ -52,7 +52,7 @@ int main()
 
     c2 = 2;
     n2 = 2;
-    d2 = 3; 
+    d2 = 3;
 
     //if the c-string can hold at least the characteristic
     if(add(c1, n1, d1, c2, n2, d2, answer, 10))
@@ -132,44 +132,25 @@ bool add(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int len)
     }
 
     //give mantissas a common denominator
+    n1 = abs(n1);
+    n2 = abs(n2);
     commonDenominator(n1, d1, n2, d2);
+
+    //handle negatives
+    if (c1 < 0 && n1 >= 0) n1 *= -1;
+    if (c2 < 0 && n2 >= 0) n2 *= -1;
 
     int resultCharacteristic = c1 + c2;
     int resultNumerator = n1 + n2;
     int resultDenominator = d1;
 
     //handle improper fractions
-    if (resultNumerator >= resultDenominator)
+    if (resultNumerator > 0 && (resultCharacteristic < 0 || resultNumerator >= resultDenominator))
     {
         resultCharacteristic++;
         resultNumerator -= resultDenominator;
     }
-
-    convertToCString(resultCharacteristic, resultNumerator, resultDenominator, result, len);
-
-    return true;
-}
-//--
-bool subtract(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int len)
-{
-    //check for invalid parameters (denominators should not be zero or negative)
-    if(d1 <=0 || d2 <=0)
-    {
-        return false;
-    }
-
-    //give mantissas a common denominator
-    commonDenominator(n1, d1, n2, d2);
-
-    int resultCharacteristic = c1 - c2;
-    int resultNumerator = n1 - n2;
-    int resultDenominator = d1;
-
-
-    //handle negative numerator
-    if (resultNumerator <0 && resultCharacteristic >= 0)
-    {
-
+    if (resultNumerator < 0 && (resultCharacteristic > 0 || resultNumerator * -1 >= resultDenominator)) {
         resultCharacteristic--;
         resultNumerator += resultDenominator;
     }
@@ -179,6 +160,12 @@ bool subtract(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int
     return true;
 }
 //--
+bool subtract(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int len)
+{
+    if (add(c1, n1, d1, c2 * -1, n2, d2, result, len)) return true;
+    return false;
+}
+//--
 bool multiply(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int len)
 {
     //check for invalid parameters (denominators should not be zero or negative)
@@ -186,6 +173,10 @@ bool multiply(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int
     {
         return false;
     }
+
+    //handle negatives
+    if (c1 < 0 && n1 >= 0) n1 *= -1;
+    if (c2 < 0 && n2 >= 0) n2 *= -1;
 
     int improperNumerator1 = (c1 * d1) + n1;
     int improperNumerator2 = (c2 * d2) + n2;
@@ -211,13 +202,24 @@ bool divide(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int l
         return false;
     }
 
+    //handle negatives
+    if (c1 < 0 && n1 >= 0) n1 *= -1;
+    if (c2 < 0 && n2 >= 0) n2 *= -1;
+
     int improperNumerator1 = (c1 * d1) + n1;
     int improperNumerator2 = (c2 * d2) + n2;
     int resultNumerator = improperNumerator1 * d2;
     int resultDenominator = d1 * improperNumerator2;
     int resultCharacteristic = 0;
 
-    while (resultNumerator >= resultDenominator) {
+    if (resultDenominator < 0)
+    {
+        resultDenominator *= -1;
+        resultNumerator *= -1;
+    }
+
+    while (resultNumerator >= resultDenominator)
+    {
         resultCharacteristic++;
         resultNumerator -= resultDenominator;
     }
@@ -288,7 +290,6 @@ bool convertToCString(int characteristic, int numerator, int denominator, char r
     //helper function, converts float into C String
 
     int characteristicLength = numberOfDigits(characteristic);
-    int currentCharInArray = 0;
 
     //if characteristic can't fit into C String
     if (characteristicLength > length - 1) {
@@ -304,11 +305,18 @@ bool convertToCString(int characteristic, int numerator, int denominator, char r
     }
 
     //if characteristic = 0
-    if (characteristic == 0) {
-        resultCString[0] = '0';
+    if (characteristic == 0) resultCString[0] = '0';
+    if (characteristic == 0 && numerator < 0)
+    {
+        resultCString[0] = '-';
+        resultCString[1] = '0';
+        characteristicLength++;
     }
 
-    currentCharInArray = characteristicLength - 1;
+    //if numerator is negative
+    if (numerator < 0) numerator *= -1;
+
+    int currentCharInArray = characteristicLength - 1;
 
     //for every digit in characteristic
     while (characteristic > 0) {
@@ -318,16 +326,15 @@ bool convertToCString(int characteristic, int numerator, int denominator, char r
         characteristic /= 10;
     }
 
-    currentCharInArray = characteristicLength;
 
     //if there is no mantissa or mantissa will not fit in array
-    if (currentCharInArray >= (length - 2) || numerator == 0)
+    if (characteristicLength >= (length - 2) || numerator == 0)
     {
         resultCString[characteristicLength] = '\0';
         return true;
     }
 
-    resultCString[currentCharInArray] = '.';
+    resultCString[characteristicLength] = '.';
     currentCharInArray = length - 2;
 
     //converts mantissa into form easier to write as a decimal
