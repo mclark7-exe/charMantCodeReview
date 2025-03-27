@@ -7,7 +7,7 @@ bool mantissa(const char numString[], int &numerator, int &denominator);
 
 int stringLength(const char numString[]);
 char *cleansed(const char numString[], bool &valid);
-bool isPeriod(const char numString[], int &pos, const int size);
+bool isDecimalPoint(const char numString[], int &pos, const int size);
 
 bool add(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int len);
 bool subtract(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int len);
@@ -99,7 +99,7 @@ bool mantissa(const char numString[], int &numerator, int &denominator) {
   int stringSize = stringLength(numString);
   int startingPos;
 
-  if (isPeriod(cleansedString, startingPos, stringSize) && startingPos != stringSize - 1 && valid) {
+  if (isDecimalPoint(cleansedString, startingPos, stringSize) && startingPos != stringSize - 1 && valid) {
     numerator = 0;
     denominator = 1;
     startingPos++;
@@ -157,7 +157,7 @@ char *cleansed(const char numString[], bool &valid) {
   return clean;
 }
 //--
-bool isPeriod(const char numString[], int &pos, const int size) {
+bool isDecimalPoint(const char numString[], int &pos, const int size) {
   bool containsPeriod = false;
   for (int i = 0; i < size; i++) {
     if (numString[i] == '.') {
