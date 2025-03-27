@@ -1,6 +1,5 @@
 
 #include <iostream>
-#include <string.h>
 using namespace std;
 
 //required function prototypes
@@ -18,6 +17,7 @@ int numberOfDigits(int targetInteger);
 bool convertToCString(int characteristic, int numerator, int denominator, char resultCString[], int length);
 bool decimalIzeFraction(int& numerator, int& denominator, int digits);
 bool removeInsignificantDigits(char numCString [], int length);
+void simplifyImproperFraction(int& characteristic, int& numerator, int& denominator);
 
 int main()
 {
@@ -145,15 +145,7 @@ bool add(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int len)
     int resultDenominator = d1;
 
     //handle improper fractions
-    if (resultNumerator > 0 && (resultCharacteristic < 0 || resultNumerator >= resultDenominator))
-    {
-        resultCharacteristic++;
-        resultNumerator -= resultDenominator;
-    }
-    if (resultNumerator < 0 && (resultCharacteristic > 0 || resultNumerator * -1 >= resultDenominator)) {
-        resultCharacteristic--;
-        resultNumerator += resultDenominator;
-    }
+    simplifyImproperFraction(resultCharacteristic, resultNumerator, resultDenominator);
 
     convertToCString(resultCharacteristic, resultNumerator, resultDenominator, result, len);
 
@@ -162,6 +154,7 @@ bool add(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int len)
 //--
 bool subtract(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int len)
 {
+    //multiply the second number by -1, then add the numbers
     if (add(c1, n1, d1, c2 * -1, n2, d2, result, len)) return true;
     return false;
 }
@@ -184,10 +177,7 @@ bool multiply(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int
     int resultDenominator = d1 * d2;
     int resultCharacteristic = 0;
 
-    while (resultNumerator >= resultDenominator) {
-        resultCharacteristic++;
-        resultNumerator -= resultDenominator;
-    }
+    simplifyImproperFraction(resultCharacteristic, resultNumerator, resultDenominator);
 
     convertToCString(resultCharacteristic, resultNumerator, resultDenominator, result, len);
 
@@ -218,11 +208,7 @@ bool divide(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int l
         resultNumerator *= -1;
     }
 
-    while (resultNumerator >= resultDenominator)
-    {
-        resultCharacteristic++;
-        resultNumerator -= resultDenominator;
-    }
+    simplifyImproperFraction(resultCharacteristic, resultNumerator, resultDenominator);
 
     convertToCString(resultCharacteristic, resultNumerator, resultDenominator, result, len);
 
@@ -239,27 +225,27 @@ bool commonDenominator(int& numerator1, int& denominator1, int& numerator2, int&
         return false;
     }
 
-    int lcm;
+    int leastCommonDenominator;
     if(denominator1 > denominator2)
     {
-        lcm = denominator1;
-        while (lcm % denominator2 != 0)
+        leastCommonDenominator = denominator1;
+        while (leastCommonDenominator % denominator2 != 0)
         {
-            lcm += denominator1;
+            leastCommonDenominator += denominator1;
         }
     }
     else
     {
-        lcm = denominator2;
-        while (lcm % denominator1 != 0)
+        leastCommonDenominator = denominator2;
+        while (leastCommonDenominator % denominator1 != 0)
         {
-            lcm += denominator2;
+            leastCommonDenominator += denominator2;
         }
     }
-    numerator1 *= (lcm / denominator1);
-    denominator1 = lcm;
-    numerator2 *= (lcm / denominator2);
-    denominator2 = lcm;
+    numerator1 *= (leastCommonDenominator / denominator1);
+    denominator1 = leastCommonDenominator;
+    numerator2 *= (leastCommonDenominator / denominator2);
+    denominator2 = leastCommonDenominator;
 
     return true;
 }
@@ -394,4 +380,16 @@ bool removeInsignificantDigits(char numCString [], int length)
         }
     }
     return true;
+}
+//--
+void simplifyImproperFraction(int& characteristic, int& numerator, int& denominator){
+    if (numerator > 0 && (characteristic < 0 || numerator >= denominator))
+    {
+        characteristic++;
+        numerator -= denominator;
+    }
+    if (numerator < 0 && (characteristic > 0 || numerator * -1 >= denominator)) {
+        characteristic--;
+        numerator += denominator;
+    }
 }
