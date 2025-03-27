@@ -8,6 +8,7 @@ bool mantissa(const char numString[], int &numerator, int &denominator);
 int stringLength(const char numString[]);
 char *cleansed(const char numString[], bool &valid);
 bool isDecimalPoint(const char numString[], int &pos, const int size);
+int findTrailingZeros(const char numString[], int stringSize);
 
 bool add(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int len);
 bool subtract(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int len);
@@ -102,6 +103,7 @@ bool mantissa(const char numString[], int &numerator, int &denominator) {
   if (cleansedString[0] == '-')
     sign = -1;
   int startingPos;
+  int endingPos = findTrailingZeros(cleansedString, stringSize);
 
   if (isDecimalPoint(cleansedString, startingPos, stringSize) && startingPos != stringSize - 1 && valid) {
     for (int i = 1; i < startingPos; i++) {
@@ -114,11 +116,14 @@ bool mantissa(const char numString[], int &numerator, int &denominator) {
     denominator = 1;
     startingPos++;
     char current = cleansedString[startingPos];
-    while (current != '\0') {
+    while (current != '\0' && startingPos <= endingPos) {
       numerator = numerator * 10 + current - 48;
       denominator *= 10;
       startingPos++;
       current = cleansedString[startingPos];
+    }
+    if (denominator == 1) {
+      denominator = 10;
     }
   } else {
     numerator = 0;
@@ -129,6 +134,17 @@ bool mantissa(const char numString[], int &numerator, int &denominator) {
 
   delete cleansedString;
   return valid;
+}
+//--
+int findTrailingZeros(const char numString[], int stringSize) {
+  int position = stringSize - 1;
+  char current = numString[position];
+  while (current == '0') {
+    position--;
+    current = numString[position];
+  }
+
+  return position;
 }
 //--
 int stringLength(const char numString[]) {
@@ -143,28 +159,53 @@ int stringLength(const char numString[]) {
 }
 //--
 char *cleansed(const char numString[], bool &valid) {
-  // Remove unneeded characters
+  // Remove unneeded characters and determine if valid
   int periodCount = 0;
+  bool plusExists = false;
+  bool numbersAllowed = true;
   int stringSize = stringLength(numString);
   char *clean = new char[stringSize + 1];
   int index = 0;
+
   for (int i = 0; i < stringSize; i++) {
     if ((numString[i] == '-' && index == 0) || numString[i] == '.' || (numString[i] >= 48 && numString[i] <= 57)) {
+      if (!numbersAllowed) {
+        valid = false; // If there are spaces in between numbers, it's not valid
+        break;
+      }
       clean[index] = numString[i];
       index++;
       if (numString[i] == '.') {
         periodCount++;
       }
-    } else if ((numString[i] == '+' && index == 0) || numString[i] == ' ') {
+    } else if (numString[i] == '+' && index > 0) {
+      valid = false; // Signs can't happen past the first character
+      break;
+    } else if (numString[i] == '+') {
+      plusExists = true;
+      continue;
+    } else if (numString[i] == ' ' && i > 0 && numString[i - 1] >= 48 && numString[i - 1] <= 57) {
+      numbersAllowed = false; // Space happened after a number, thus no more numbers are allowed
+      continue;
+    } else if (numString[i] == ' ') {
       continue;
     } else {
       valid = false;
+      break;
     }
   }
+
+  // If there are more than one period, ending character isn't a number,
+  // multiple signs, or character after '-' isn't a number, it's not valid
   if (periodCount > 1) {
     valid = false;
+  } else if (clean[index - 1] < 48 || clean[index - 1] > 57) {
+    valid = false;
+  } else if ((clean[0] == '-' && plusExists)) {
+    valid = false;
+  } else if (clean[0] == '-' && (clean[1] < 48 && clean[1] > 57)) {
+    valid = false;
   }
-
   clean[index] = '\0';
   return clean;
 }
