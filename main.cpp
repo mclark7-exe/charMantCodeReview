@@ -18,7 +18,7 @@ bool divide(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int l
 int main() {
   // this c-string, or array of 8 characters, ends with the null terminating character '\0'
   //['1', '2', '3', '.', '4', '5', '6', '\0']
-  const char number[] = "123.456";
+  const char number[] = "-.456";
   int c, n, d;
 
   // if both conversions from c-string to integers can take place
@@ -93,10 +93,10 @@ bool characteristic(const char numString[], int &c) {
 }
 //--
 bool mantissa(const char numString[], int &numerator, int &denominator) {
-  // hard coded return value to make the main() work
+  // Find numerator and denominator
   bool valid = true;
   char *cleansedString = cleansed(numString, valid);
-  int stringSize = stringLength(numString);
+  int stringSize = stringLength(cleansedString);
   int startingPos;
 
   if (isDecimalPoint(cleansedString, startingPos, stringSize) && startingPos != stringSize - 1 && valid) {
