@@ -170,16 +170,14 @@ char *cleansed(const char numString[], bool &valid) {
 }
 //--
 bool isDecimalPoint(const char numString[], int &pos, const int size) {
-  bool containsPeriod = false;
   for (int i = 0; i < size; i++) {
     if (numString[i] == '.') {
-      containsPeriod = true;
       pos = i;
-      break;
+      return true;
     }
   }
 
-  return containsPeriod;
+  return false;
 }
 //--
 bool add(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int len) {
