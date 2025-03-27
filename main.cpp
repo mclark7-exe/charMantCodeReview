@@ -97,9 +97,19 @@ bool mantissa(const char numString[], int &numerator, int &denominator) {
   bool valid = true;
   char *cleansedString = cleansed(numString, valid);
   int stringSize = stringLength(cleansedString);
+  int sign = 1;
+  bool characteristicIsZero = true;
+  if (cleansedString[0] == '-')
+    sign = -1;
   int startingPos;
 
   if (isDecimalPoint(cleansedString, startingPos, stringSize) && startingPos != stringSize - 1 && valid) {
+    for (int i = 1; i < startingPos; i++) {
+      if (cleansedString[i] != '0' && sign == -1) {
+        characteristicIsZero = false;
+        break;
+      }
+    }
     numerator = 0;
     denominator = 1;
     startingPos++;
@@ -114,6 +124,8 @@ bool mantissa(const char numString[], int &numerator, int &denominator) {
     numerator = 0;
     denominator = 10;
   }
+  if (characteristicIsZero)
+    numerator *= sign;
 
   delete cleansedString;
   return valid;
