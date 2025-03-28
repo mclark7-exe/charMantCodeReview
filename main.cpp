@@ -20,108 +20,61 @@ bool removeInsignificantDigits(char numCString [], int length);
 void simplifyImproperFraction(int& characteristic, int& numerator, int& denominator);
 void handleNegatives(int& characteristic1, int& numerator1, int& characteristic2, int& numerator2);
 
-int main()
-{
-    //this c-string, or array of 8 characters, ends with the null terminating character '\0'
-    //['1', '2', '3', '.', '4', '5', '6', '\0']
-    const char number[] = "123.456"; 
-    int c, n, d;
-
-    //if both conversions from c-string to integers can take place
-    if(characteristic(number, c) && mantissa(number, n, d))
-    {
-        //do some math with c, n, and d
-        cout<<"c: "<<c<<endl;
-        cout<<"n: "<<n<<endl;
-        cout<<"d: "<<d<<endl;
-    }
-    else //at least one of the conversions failed
-    {
-        //handle the error on input
-        cout<<"Error on input"<<endl;
-    }
-
-    //room for 9 characters plus the null terminating character
-    char answer[10];
-    int c1, n1, d1;
-    int c2, n2, d2;
-
-    //initialize the values
-    c1 = 1;
-    n1 = 1;
-    d1 = 2;
-
-    c2 = 2;
-    n2 = 2;
-    d2 = 3;
-
-    //if the c-string can hold at least the characteristic
-    if(add(c1, n1, d1, c2, n2, d2, answer, 10))
-    {
-        //display string with answer 4.1666666 (cout stops printing at the null terminating character)
-        cout<<"Answer: "<<answer<<endl;
-    }
-    else
-    {
-        //display error message
-        cout<<"Error on add"<<endl;
-    }
-
-    if(divide(c1, n1, d1, c2, n2, d2, answer, 10))
-    {
-        //display string with answer
-        cout<<"Answer: "<<answer<<endl;
-    }
-    else
-    {
-        //display error message
-        cout<<"Error on divide"<<endl;
-    }
-
-    if(commonDenominator(n1, d1, n2, d2))
-    {
-        //display new n1, d1, n2, d2
-        cout<<"n1: "<<n1<<endl;
-        cout<<"d1: "<<d1<<endl;
-        cout<<"n2: "<<n2<<endl;
-        cout<<"d2: "<<d2<<endl;
-
-    }
-    else
-    {
-        //display error message
-        cout<<"Error on finding common denominator"<<endl;
-    }
-
-    if(decimalIzeFraction(n2, d2, 6))
-    {
-        //display new n1, d1
-        cout<<"n2: "<<n2<<endl;
-        cout<<"d2: "<<d2<<endl;
-
-    }
-    else
-    {
-        //display error message
-        cout<<"Error on decimalizing fraction"<<endl;
-    }
-
-    return 0;
-}
+int stringLength(const char numString[]);
+char *cleansed(const char numString[], bool &valid);
+bool isDecimalPoint(const char numString[], int &pos, const int size);
+int findTrailingZeros(const char numString[], int stringSize);
 //--
-bool characteristic(const char numString[], int& c)
-{
-    //hard coded return value to make the main() work
-    c = 123;
-    return true;
-}
-//--
-bool mantissa(const char numString[], int& numerator, int& denominator)
-{
-    //hard coded return value to make the main() work
-    numerator = 456;
-    denominator = 1000;
-    return true;
+int main() {
+  // this c-string, or array of 8 characters, ends with the null terminating character '\0'
+  //['1', '2', '3', '.', '4', '5', '6', '\0']
+  const char number[] = "-.456";
+  int c, n, d;
+
+  // if both conversions from c-string to integers can take place
+  if (characteristic(number, c) && mantissa(number, n, d)) {
+    // do some math with c, n, and d
+    cout << "c: " << c << endl;
+    cout << "n: " << n << endl;
+    cout << "d: " << d << endl;
+  } else // at least one of the conversions failed
+  {
+    // handle the error on input
+    cout << "Error on input" << endl;
+  }
+
+  // room for 9 characters plus the null terminating character
+  char answer[10];
+  int c1, n1, d1;
+  int c2, n2, d2;
+
+  // initialize the values
+  c1 = 1;
+  n1 = 1;
+  d1 = 2;
+
+  c2 = 2;
+  n2 = 2;
+  d2 = 3;
+
+  // if the c-string can hold at least the characteristic
+  if (add(c1, n1, d1, c2, n2, d2, answer, 10)) {
+    // display string with answer 4.1666666 (cout stops printing at the null terminating character)
+    cout << "Answer: " << answer << endl;
+  } else {
+    // display error message
+    cout << "Error on add" << endl;
+  }
+
+  if (divide(c1, n1, d1, c2, n2, d2, answer, 10)) {
+    // display string with answer
+    cout << "Answer: " << answer << endl;
+  } else {
+    // display error message
+    cout << "Error on divide" << endl;
+  }
+
+  return 0;
 }
 //--
 bool add(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int len)
@@ -370,7 +323,7 @@ bool decimalIzeFraction(int& numerator, int& denominator, int digits)
 
     return true;
 }
-
+//--
 bool removeInsignificantDigits(char numCString [], int length)
 {
     //removes unnecessary zeroes at the end of a mantissa
@@ -404,8 +357,161 @@ void simplifyImproperFraction(int& characteristic, int& numerator, int& denomina
         numerator += denominator;
     }
 }
-
+//--
 void handleNegatives(int& characteristic1, int& numerator1, int& characteristic2, int& numerator2){
     if (characteristic1 < 0 && numerator1 >= 0) numerator1 *= -1;
     if (characteristic2 < 0 && numerator2 >= 0) numerator2 *= -1;
+}
+//--
+bool characteristic(const char numString[], int &c) {
+  bool valid = true;
+  int characteristic = 0;
+  int sign = 1;
+  int index = 0;
+
+  char *cleansedString = cleansed(numString, valid);
+  if (cleansedString[index] == '-') {
+    sign *= -1;
+    index++;
+  }
+
+  char current = cleansedString[index];
+  if (current >= 48 && current <= 57 && valid) {
+    while (current != '\0' && current != '.') {
+      characteristic = characteristic * 10 + current - 48;
+      index++;
+      current = cleansedString[index];
+    }
+  }
+  delete cleansedString;
+  c = characteristic * sign;
+  return valid;
+}
+//--
+bool mantissa(const char numString[], int &numerator, int &denominator) {
+  // Find numerator and denominator
+  bool valid = true;
+  char *cleansedString = cleansed(numString, valid);
+  int stringSize = stringLength(cleansedString);
+  int sign = 1;
+  bool characteristicIsZero = true;
+  if (cleansedString[0] == '-')
+    sign = -1;
+  int startingPos;
+  int endingPos = findTrailingZeros(cleansedString, stringSize);
+
+  if (isDecimalPoint(cleansedString, startingPos, stringSize) && startingPos != stringSize - 1 && valid) {
+    for (int i = 1; i < startingPos; i++) {
+      if (cleansedString[i] != '0' && sign == -1) {
+        characteristicIsZero = false;
+        break;
+      }
+    }
+    numerator = 0;
+    denominator = 1;
+    startingPos++;
+    char current = cleansedString[startingPos];
+    while (current != '\0' && startingPos <= endingPos) {
+      numerator = numerator * 10 + current - 48;
+      denominator *= 10;
+      startingPos++;
+      current = cleansedString[startingPos];
+    }
+    if (denominator == 1) {
+      denominator = 10;
+    }
+  } else {
+    numerator = 0;
+    denominator = 10;
+  }
+  if (characteristicIsZero)
+    numerator *= sign;
+
+  delete cleansedString;
+  return valid;
+}
+//--
+int findTrailingZeros(const char numString[], int stringSize) {
+  int position = stringSize - 1;
+  char current = numString[position];
+  while (current == '0') {
+    position--;
+    current = numString[position];
+  }
+
+  return position;
+}
+//--
+int stringLength(const char numString[]) {
+  // Find and return length of char[]
+  int count = 0;
+  char iterator = numString[count];
+  while (iterator != '\0') {
+    count++;
+    iterator = numString[count];
+  }
+  return count;
+}
+//--
+char *cleansed(const char numString[], bool &valid) {
+  // Remove unneeded characters and determine if valid
+  int periodCount = 0;
+  bool plusExists = false;
+  bool numbersAllowed = true;
+  int stringSize = stringLength(numString);
+  char *clean = new char[stringSize + 1];
+  int index = 0;
+
+  for (int i = 0; i < stringSize; i++) {
+    if ((numString[i] == '-' && index == 0) || numString[i] == '.' || (numString[i] >= 48 && numString[i] <= 57)) {
+      if (!numbersAllowed) {
+        valid = false; // If there are spaces in between numbers, it's not valid
+        break;
+      }
+      clean[index] = numString[i];
+      index++;
+      if (numString[i] == '.') {
+        periodCount++;
+      }
+    } else if (numString[i] == '+' && index > 0) {
+      valid = false; // Signs can't happen past the first character
+      break;
+    } else if (numString[i] == '+') {
+      plusExists = true;
+      continue;
+    } else if (numString[i] == ' ' && i > 0 && numString[i - 1] >= 48 && numString[i - 1] <= 57) {
+      numbersAllowed = false; // Space happened after a number, thus no more numbers are allowed
+      continue;
+    } else if (numString[i] == ' ') {
+      continue;
+    } else {
+      valid = false;
+      break;
+    }
+  }
+
+  // If there are more than one period, ending character isn't a number,
+  // multiple signs, or character after '-' isn't a number, it's not valid
+  if (periodCount > 1) {
+    valid = false;
+  } else if (clean[index - 1] < 48 || clean[index - 1] > 57) {
+    valid = false;
+  } else if ((clean[0] == '-' && plusExists)) {
+    valid = false;
+  } else if (clean[0] == '-' && (clean[1] < 48 && clean[1] > 57)) {
+    valid = false;
+  }
+  clean[index] = '\0';
+  return clean;
+}
+//--
+bool isDecimalPoint(const char numString[], int &pos, const int size) {
+  for (int i = 0; i < size; i++) {
+    if (numString[i] == '.') {
+      pos = i;
+      return true;
+    }
+  }
+
+  return false;
 }
