@@ -1,5 +1,5 @@
-
 #include <iostream>
+
 using namespace std;
 
 //required function prototypes
@@ -18,6 +18,7 @@ bool convertToCString(int characteristic, int numerator, int denominator, char r
 bool decimalIzeFraction(int& numerator, int& denominator, int digits);
 bool removeInsignificantDigits(char numCString [], int length);
 void simplifyImproperFraction(int& characteristic, int& numerator, int& denominator);
+void handleNegatives(int& characteristic1, int& numerator1, int& characteristic2, int& numerator2);
 
 int main()
 {
@@ -126,10 +127,10 @@ bool mantissa(const char numString[], int& numerator, int& denominator)
 bool add(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int len)
 {
     //check for invalid parameters (denominators should not be zero or negative)
-    if(d1 <=0 || d2 <=0)
-    {
-        return false;
-    }
+    if(d1 <=0 || d2 <=0) return false;
+
+    //check for overflow
+    if (c1 > INT_MAX - c2) return false;
 
     //give mantissas a common denominator
     n1 = abs(n1);
@@ -137,8 +138,7 @@ bool add(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int len)
     commonDenominator(n1, d1, n2, d2);
 
     //handle negatives
-    if (c1 < 0 && n1 >= 0) n1 *= -1;
-    if (c2 < 0 && n2 >= 0) n2 *= -1;
+    handleNegatives(c1, n1, c2, n2);
 
     int resultCharacteristic = c1 + c2;
     int resultNumerator = n1 + n2;
@@ -147,9 +147,9 @@ bool add(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int len)
     //handle improper fractions
     simplifyImproperFraction(resultCharacteristic, resultNumerator, resultDenominator);
 
-    convertToCString(resultCharacteristic, resultNumerator, resultDenominator, result, len);
+    if (convertToCString(resultCharacteristic, resultNumerator, resultDenominator, result, len)) return true;
 
-    return true;
+    return false;
 }
 //--
 bool subtract(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int len)
@@ -162,57 +162,58 @@ bool subtract(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int
 bool multiply(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int len)
 {
     //check for invalid parameters (denominators should not be zero or negative)
-    if(d1 <=0 || d2 <=0)
-    {
-        return false;
-    }
+    if(d1 <=0 || d2 <=0) return false;
 
     //handle negatives
-    if (c1 < 0 && n1 >= 0) n1 *= -1;
-    if (c2 < 0 && n2 >= 0) n2 *= -1;
+    handleNegatives(c1, n1, c2, n2);
 
+    //convert each number into improper fractions
     int improperNumerator1 = (c1 * d1) + n1;
     int improperNumerator2 = (c2 * d2) + n2;
+
+    //multiply the numerators and denominators
     int resultNumerator = improperNumerator1 * improperNumerator2;
     int resultDenominator = d1 * d2;
     int resultCharacteristic = 0;
 
+    //simplify improper fraction
     simplifyImproperFraction(resultCharacteristic, resultNumerator, resultDenominator);
 
-    convertToCString(resultCharacteristic, resultNumerator, resultDenominator, result, len);
+    if (convertToCString(resultCharacteristic, resultNumerator, resultDenominator, result, len)) return true;
 
-    return true;
+    return false;
 }
 //--
 bool divide(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int len)
 {
-    //check for invalid parameters (denominators should not be zero or negative)
-    if(d1 <=0 || d2 <=0)
-    {
-        return false;
-    }
+    //check for invalid parameters (denominators should not be zero or negative, second characteristic and numerator should not both be negative)
+    if(d1 <=0 || d2 <=0 || (c2 == 0 && n2 == 0)) return false;
 
     //handle negatives
-    if (c1 < 0 && n1 >= 0) n1 *= -1;
-    if (c2 < 0 && n2 >= 0) n2 *= -1;
+    handleNegatives(c1, n1, c2, n2);
 
+    //convert each number into improper fractions
     int improperNumerator1 = (c1 * d1) + n1;
     int improperNumerator2 = (c2 * d2) + n2;
+
+    //multiply the first improper fraction by the reciprocal of the second improper fraction
     int resultNumerator = improperNumerator1 * d2;
     int resultDenominator = d1 * improperNumerator2;
     int resultCharacteristic = 0;
 
+    //handle negative denominator
     if (resultDenominator < 0)
     {
         resultDenominator *= -1;
         resultNumerator *= -1;
     }
 
+    //simplify improper fraction
     simplifyImproperFraction(resultCharacteristic, resultNumerator, resultDenominator);
 
-    convertToCString(resultCharacteristic, resultNumerator, resultDenominator, result, len);
+    if (convertToCString(resultCharacteristic, resultNumerator, resultDenominator, result, len)) return true;
 
-    return true;
+    return false;
 }
 //--
 bool commonDenominator(int& numerator1, int& denominator1, int& numerator2, int& denominator2){
@@ -220,10 +221,7 @@ bool commonDenominator(int& numerator1, int& denominator1, int& numerator2, int&
     //gives two mantissas a common denominator for easier addition and subtraction
 
     //check for invalid parameters (denominators should not be zero or negative)
-    if(denominator1 <=0 || denominator2 <=0)
-    {
-        return false;
-    }
+    if(denominator1 <=0 || denominator2 <=0) return false;
 
     int leastCommonDenominator;
     if(denominator1 > denominator2)
@@ -276,6 +274,8 @@ bool convertToCString(int characteristic, int numerator, int denominator, char r
     //helper function, converts float into C String
 
     int characteristicLength = numberOfDigits(characteristic);
+    if(characteristicLength > length) return false;
+    int numeratorLength;
 
     //if characteristic can't fit into C String
     if (characteristicLength > length - 1) {
@@ -321,10 +321,12 @@ bool convertToCString(int characteristic, int numerator, int denominator, char r
     }
 
     resultCString[characteristicLength] = '.';
-    currentCharInArray = length - 2;
 
     //converts mantissa into form easier to write as a decimal
     decimalIzeFraction(numerator, denominator, length - characteristicLength - 2);
+
+    numeratorLength = numberOfDigits(numerator);
+    currentCharInArray = characteristicLength + numeratorLength;
 
     while (numerator > 0) {
         //add digit
@@ -351,8 +353,15 @@ bool decimalIzeFraction(int& numerator, int& denominator, int digits)
     int newDenominator = 1;
 
     for (int i = digits; i > 0; i--) {
-        newNumerator *= 10;
-        newDenominator *= 10;
+        if (newNumerator <= 214748364 && newDenominator <= 214748364)
+        {
+            newNumerator *= 10;
+            newDenominator *= 10;
+        }
+        else
+        {
+            break;
+        }
     }
 
     numerator = newNumerator / denominator;
@@ -364,9 +373,11 @@ bool decimalIzeFraction(int& numerator, int& denominator, int digits)
 
 bool removeInsignificantDigits(char numCString [], int length)
 {
+    //removes unnecessary zeroes at the end of a mantissa
+
     for (int i = length - 2; i >= 0; i--)
     {
-        if (numCString[i] == '0')
+        if (numCString[i] == '0' || !numCString[i])
         {
             numCString[i] = '\0';
         }
@@ -383,13 +394,18 @@ bool removeInsignificantDigits(char numCString [], int length)
 }
 //--
 void simplifyImproperFraction(int& characteristic, int& numerator, int& denominator){
-    if (numerator > 0 && (characteristic < 0 || numerator >= denominator))
+    while (numerator > 0 && (characteristic < 0 || numerator >= denominator))
     {
         characteristic++;
         numerator -= denominator;
     }
-    if (numerator < 0 && (characteristic > 0 || numerator * -1 >= denominator)) {
+    while (numerator < 0 && (characteristic > 0 || numerator * -1 >= denominator)) {
         characteristic--;
         numerator += denominator;
     }
+}
+
+void handleNegatives(int& characteristic1, int& numerator1, int& characteristic2, int& numerator2){
+    if (characteristic1 < 0 && numerator1 >= 0) numerator1 *= -1;
+    if (characteristic2 < 0 && numerator2 >= 0) numerator2 *= -1;
 }
