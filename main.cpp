@@ -83,7 +83,7 @@ bool add(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int len)
     if(d1 <=0 || d2 <=0) return false;
 
     //check for overflow
-    if (c1 > INT_MAX - c2) return false;
+    if (c1 > 2147483647 - c2) return false;
 
     //give mantissas a common denominator
     n1 = abs(n1);
